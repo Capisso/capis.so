@@ -1,17 +1,40 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Application Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register all of the routes for an application.
-| It's a breeze. Simply tell Laravel the URIs it should respond to
-| and give it the Closure to execute when that URI is requested.
-|
-*/
+Route::any(
+    '/create',
+    array(
+        'before' => 'auth.basic',
+        'do' => function () {
+            $url = Input::get('url');
+            $validator = Validator::make(
+                array('url' => $url),
+                array('url' => 'required|url')
+            );
 
-Route::get('/', function()
-{
-	return View::make('hello');
-});
+            if ($validator->fails()) {
+                return Response::json(array('error' => $validator->messages()->first()), 400);
+            } else {
+                $alias = Capisso\URL::alias();
+                $url = Capisso\URL::create(array('alias' => $alias, 'url' => $url));
+                if ($url) {
+                    return Response::json($url, 201);
+                } else {
+                    return Response::json(array('error' => 'An error occurred while shortening the URL.'), 500);
+                }
+            }
+        }
+    )
+);
+
+Route::get(
+    '/{alias}',
+    function ($alias) {
+        $url = Capisso\URL::where('alias', '=', $alias)->first();
+
+        if ($url == false) {
+            App::abort(404);
+        } else {
+            return Redirect::to($url->url, 302);
+        }
+    }
+);
