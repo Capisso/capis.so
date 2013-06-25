@@ -18,7 +18,7 @@ Route::any(
                 if (empty($alias)) {
                     $alias = Capisso\URL::alias();
                 }
-                $url = Capisso\URL::create(array('alias' => $alias, 'url' => $url));
+                $url = Capisso\URL::create(array('user_id' => Auth::user()->id, 'alias' => $alias, 'url' => $url));
                 if ($url) {
                     return Response::json($url, 201);
                 } else {

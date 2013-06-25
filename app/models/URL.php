@@ -5,7 +5,7 @@ namespace Capisso;
 class URL extends \Eloquent
 {
     protected $table = 'urls';
-    protected $fillable = array('alias', 'url');
+    protected $fillable = array('alias', 'url', 'user_id');
     protected $visible = array('alias', 'url');
 
     public static function alias($length = 3)
