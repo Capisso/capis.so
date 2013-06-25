@@ -6,15 +6,18 @@ Route::any(
         'before' => 'auth.basic',
         'do' => function () {
             $url = Input::get('url');
+            $alias = Input::get('alias');
             $validator = Validator::make(
-                array('url' => $url),
-                array('url' => 'required|url')
+                compact('url', 'alias'),
+                array('url' => 'required|url', 'alias' => 'unique:urls')
             );
 
             if ($validator->fails()) {
                 return Response::json(array('error' => $validator->messages()->first()), 400);
             } else {
-                $alias = Capisso\URL::alias();
+                if (empty($alias)) {
+                    $alias = Capisso\URL::alias();
+                }
                 $url = Capisso\URL::create(array('alias' => $alias, 'url' => $url));
                 if ($url) {
                     return Response::json($url, 201);
