@@ -10,8 +10,7 @@ class URL extends \Eloquent
 
     public static function alias($length = 3)
     {
-        $pool = implode('', array_merge(range('a', 'z'), range('A', 'Z')));
-        $alias = substr(str_shuffle(str_repeat($pool, 3)), 0, $length);
+        $alias = \Str::quickRandom($length);
 
         if (self::where('alias', '=', $alias)->first() != false) {
             $alias = self::alias($length);
