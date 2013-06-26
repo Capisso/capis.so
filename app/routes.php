@@ -1,32 +1,38 @@
 <?php
 
-Route::any(
-    '/create',
-    array(
-        'before' => 'auth.basic',
-        'do' => function () {
-            $url = Input::get('url');
-            $alias = Input::get('alias');
-            $validator = Validator::make(
-                compact('url', 'alias'),
-                array('url' => 'required|url', 'alias' => 'unique:urls')
-            );
+Route::group(
+    array('before' => 'auth.basic'),
+    function () {
+        Route::any(
+            '/create',
+            function () {
+                $url = Input::get('url');
+                $alias = Input::get('alias');
+                $validator = Validator::make(
+                    compact('url', 'alias'),
+                    array('url' => 'required|url', 'alias' => 'unique:urls')
+                );
 
-            if ($validator->fails()) {
-                return Response::json(array('error' => $validator->messages()->first()), 400);
-            } else {
-                if (empty($alias)) {
-                    $alias = Capisso\URL::alias();
-                }
-                $url = Capisso\URL::create(array('user_id' => Auth::user()->id, 'alias' => $alias, 'url' => $url));
-                if ($url) {
-                    return Response::json($url, 201);
+                if ($validator->fails()) {
+                    return Response::json(array('error' => $validator->messages()->first()), 400);
                 } else {
-                    return Response::json(array('error' => 'An error occurred while shortening the URL.'), 500);
+                    if (empty($alias)) {
+                        $alias = Capisso\URL::alias();
+                    }
+
+                    $user = Auth::user();
+                    $url = new Capisso\URL(array('alias' => $alias, 'url' => $url));
+                    $url = $user->urls()->save($url);
+
+                    if ($url) {
+                        return Response::json($url, 201);
+                    } else {
+                        return Response::json(array('error' => 'An error occurred while shortening the URL.'), 500);
+                    }
                 }
             }
-        }
-    )
+        );
+    }
 );
 
 Route::get(
