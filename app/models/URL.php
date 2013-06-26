@@ -8,6 +8,11 @@ class URL extends \Eloquent
     protected $fillable = array('alias', 'url', 'user_id');
     protected $visible = array('alias', 'url');
 
+    public function user()
+    {
+        return $this->belongsTo('User');
+    }
+
     public static function alias($length = 3)
     {
         $alias = \Str::quickRandom($length);
